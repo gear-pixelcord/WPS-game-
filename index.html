@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WPS Typing Game</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #3498db;
+      color: white;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #word {
+      font-size: 2em;
+      margin: 20px 0;
+    }
+
+    input {
+      font-family: monospace;
+      font-size: 1.2em;
+      padding: 5px 10px;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      text-align: center;
+      outline: none;
+    }
+
+    input:disabled {
+      opacity: 0.5;
+    }
+
+    button {
+      font-family: monospace;
+      font-size: 1em;
+      padding: 5px 15px;
+      margin-top: 10px;
+      cursor: pointer;
+      background-color: #2980b9;
+      border: none;
+      color: white;
+    }
+
+    #result, #timer, #wordTimer {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+
+    #footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.9em;
+      color: white;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Words Per Second</h1>
+  <p>Type each word within 10 seconds. Game ends after 60 seconds!</p>
+
+  <div id="word">Press "Start" to begin</div>
+  <input type="text" id="input" placeholder="Type here..." disabled />
+  <button id="start-btn">Start</button>
+
+  <div id="timer"></div>
+  <div id="wordTimer"></div>
+  <div id="result"></div>
+
+  <div id="footer">Made by pixelcord.gear</div>
+
+  <script>
+    const words = [
+      "apple", "banana", "orange", "grape", "melon", "kiwi", "peach", "mango", "pear", "plum",
+      "strawberry", "blueberry", "raspberry", "blackberry", "watermelon", "pineapple", "coconut", "papaya", "lychee", "fig",
+      "car", "truck", "bicycle", "motorcycle", "scooter", "airplane", "helicopter", "boat", "ship", "submarine",
+      "dog", "cat", "mouse", "rabbit", "hamster", "horse", "donkey", "elephant", "giraffe", "zebra",
+      "computer", "laptop", "keyboard", "monitor", "printer", "mousepad", "speaker", "microphone", "headphones", "camera",
+      "house", "apartment", "building", "skyscraper", "cottage", "mansion", "hut", "tent", "igloo", "castle",
+      "red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black", "white",
+      "sun", "moon", "star", "planet", "galaxy", "comet", "asteroid", "meteor", "satellite", "nebula",
+      "rain", "snow", "wind", "storm", "lightning", "thunder", "cloud", "fog", "hail", "drizzle",
+      "happy", "sad", "angry", "excited", "scared", "nervous", "bored", "confused", "surprised", "tired",
+      "run", "jump", "walk", "swim", "climb", "crawl", "skip", "dance", "sing", "laugh",
+      "school", "teacher", "student", "classroom", "desk", "chair", "blackboard", "notebook", "pencil", "pen",
+      "bread", "butter", "cheese", "milk", "egg", "rice", "pasta", "pizza", "burger", "sandwich",
+      "mountain", "hill", "valley", "desert", "forest", "jungle", "ocean", "river", "lake", "island",
+      "fire", "water", "earth", "air", "light", "dark", "shadow", "glow", "spark", "flame"
+    ];
+
+    const wordEl = document.getElementById('word');
+    const inputEl = document.getElementById('input');
+    const startBtn = document.getElementById('start-btn');
+    const resultEl = document.getElementById('result');
+    const timerEl = document.getElementById('timer');
+    const wordTimerEl = document.getElementById('wordTimer');
+
+    let score = 0;
+    let totalTime = 60;
+    let wordTime = 10;
+    let currentWord = '';
+    let gameTimer = null;
+    let wordTimer = null;
+
+    function pickWord() {
+      return words[Math.floor(Math.random() * words.length)];
+    }
+
+    function showNextWord() {
+      currentWord = pickWord();
+      wordEl.textContent = currentWord;
+      inputEl.value = '';
+      inputEl.focus();
+      resetWordTimer();
+    }
+
+    function startGame() {
+      score = 0;
+      totalTime = 60;
+      resultEl.textContent = '';
+      startBtn.disabled = true;
+      inputEl.disabled = false;
+      inputEl.focus();
+
+      showNextWord();
+      updateTotalTimerDisplay();
+
+      gameTimer = setInterval(() => {
+        totalTime--;
+        updateTotalTimerDisplay();
+        if (totalTime <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      clearInterval(gameTimer);
+      clearInterval(wordTimer);
+      inputEl.disabled = true;
+      wordEl.textContent = "Game Over!";
+      timerEl.textContent = '';
+      wordTimerEl.textContent = '';
+      const wps = (score / 60).toFixed(2);
+      resultEl.textContent = `Score: ${score} words | WPS: ${wps}`;
+      startBtn.disabled = false;
+    }
+
+    function resetWordTimer() {
+      clearInterval(wordTimer);
+      wordTime = 10;
+      updateWordTimerDisplay();
+      wordTimer = setInterval(() => {
+        wordTime--;
+        updateWordTimerDisplay();
+        if (wordTime <= 0) {
+          showNextWord(); // Automatically skip
+        }
+      }, 1000);
+    }
+
+    function updateTotalTimerDisplay() {
+      timerEl.textContent = `Total time left: ${totalTime}s`;
+    }
+
+    function updateWordTimerDisplay() {
+      wordTimerEl.textContent = `Word time left: ${wordTime}s`;
+    }
+
+    inputEl.addEventListener('input', () => {
+      if (inputEl.value.trim().toLowerCase() === currentWord.toLowerCase()) {
+        score++;
+        showNextWord();
+      }
+    });
+
+    startBtn.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
